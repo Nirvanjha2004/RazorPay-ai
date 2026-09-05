@@ -59,6 +59,15 @@ model ChatSession {
   updatedAt    DateTime @updatedAt
 }
 
+model BuyerRun {
+  id          String   @id @default(cuid())
+  request     String
+  intentJson  String
+  stepsJson   String // [{ at, agent, action, detail, status }]
+  summaryJson String
+  createdAt   DateTime @default(now())
+}
+
 model AuditLog {
   id                String    @id @default(cuid())
   // Agent metadata

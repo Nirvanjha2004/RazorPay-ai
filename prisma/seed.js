@@ -86,6 +86,16 @@ const products = [
     stock: 55,
   },
   {
+    id: "prod_maintenance_kit",
+    name: "Brewline Descaling & Cleaning Kit",
+    description:
+      "Monthly maintenance kit: descaling solution, a group-head cleaning brush and food-grade lubricant to keep your espresso machine and grinder performing at their best.",
+    priceInPaise: 49900,
+    imageUrl: null,
+    category: "maintenance",
+    stock: 15,
+  },
+  {
     id: "prod_tamper_58mm",
     name: "Brewline Calibrated Tamper 58mm",
     description:

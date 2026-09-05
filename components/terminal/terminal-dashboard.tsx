@@ -8,6 +8,7 @@ import { ActivityFeed } from "./activity-feed";
 import { AuditPanel } from "./audit-panel";
 import { GuardianCard } from "./guardian-card";
 import { CustomerChat } from "./customer-chat";
+import { AiBuyerDemo } from "@/components/ai-buyer/ai-buyer-demo";
 
 const SESSION_KEY = "commerceagent_session_id";
 const EMPTY_STREAM: StreamResponse = {
@@ -96,6 +97,7 @@ export function TerminalDashboard() {
           </span>
         </div>
         <div className="flex items-center gap-4 text-[11px]">
+          <AiBuyerDemo />
           <span className="text-zinc-500">
             SESSION <span className="text-zinc-300">{sessionId || "…"}</span>
           </span>

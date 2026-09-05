@@ -94,7 +94,15 @@ export function getRazorpayClient(): Razorpay {
 }
 
 export function isRazorpayConfigured(): boolean {
-  return Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !keySecret) return false;
+  // Placeholder test values in .env are "present" but not usable — treat the
+  // integration as unconfigured so demos fall back to demo orders cleanly.
+  const placeholderId = /x{2,}|your_|xxxx/i.test(keyId);
+  const placeholderSecret = /your_|xxxx/i.test(keySecret);
+  const looksReal = /^rzp_(test|live)_[0-9A-Za-z]{12,}$/.test(keyId);
+  return looksReal && !placeholderId && !placeholderSecret;
 }
 
 export function getPublicKeyId(): string | null {
