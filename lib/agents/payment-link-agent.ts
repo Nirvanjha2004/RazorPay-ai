@@ -3,7 +3,7 @@
  * Guardrails: per-action spend cap, daily spend cap, currency allowlist.
  */
 
-import { createPaymentLink } from "@/lib/razorpay/client";
+import { createStandalonePaymentLink } from "@/lib/razorpay/client";
 import { executeAgent, type AgentMetadata, type AgentRunResult } from "@/lib/agents/executor";
 import type { AgentType, PaymentLinkAgentInput, PaymentLinkAgentOutput } from "@/lib/agents/types";
 
@@ -27,7 +27,7 @@ export async function runPaymentLinkAgent(
       currency: input.currency ?? "INR",
     },
     execute: async () => {
-      const link = await createPaymentLink({
+      const link = await createStandalonePaymentLink({
         amountInPaise: input.amountInPaise,
         currency: input.currency,
         description: input.description,

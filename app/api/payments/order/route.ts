@@ -7,18 +7,19 @@ import { assertAllowedToAct, GuardrailViolation } from "@/lib/guardrails";
 export const dynamic = "force-dynamic";
 
 /**
- * POST /api/payments/order — create a Razorpay order (guardrail-protected).
+ * POST /api/payments/order — create a Razorpay order (guardrail-protected)
+ * and persist it locally so webhooks can update its status later.
  * Body: { amountInPaise: number, receipt?: string, notes?: Record<string,string> }
  */
 export async function POST(request: NextRequest) {
-  let body: { amountInPaise?: number; currency?: string; receipt?: string; notes?: Record<string, string> };
+  let body: { amountInPaise?: number; receipt?: string; notes?: Record<string, string> };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { currency = "INR", receipt, notes } = body ?? {};
+  const { receipt, notes } = body ?? {};
   const amountInPaise = body?.amountInPaise;
   if (typeof amountInPaise !== "number" || !Number.isInteger(amountInPaise) || amountInPaise <= 0) {
     return NextResponse.json(
@@ -29,9 +30,23 @@ export async function POST(request: NextRequest) {
 
   const requestId = crypto.randomUUID();
   try {
-    await assertAllowedToAct({ action: "create_order", amountInPaise, currency });
+    await assertAllowedToAct({ action: "create_order", amountInPaise, currency: "INR" });
 
-    const order = await createOrder({ amountInPaise, currency, receipt, notes });
+    // Razorpay Orders API (test mode)
+    const order = await createOrder(amountInPaise, notes, receipt);
+
+    // Persist locally so webhook events (payment.captured / payment.failed)
+    // can update this row's status.
+    await prisma.order.create({
+      data: {
+        razorpayOrderId: order.id,
+        amountInPaise: order.amount,
+        currency: order.currency,
+        receipt: receipt ?? null,
+        notes: JSON.stringify(notes ?? {}),
+        status: "CREATED",
+      },
+    });
 
     await prisma.auditLog.create({
       data: {
@@ -59,7 +74,7 @@ export async function POST(request: NextRequest) {
             blockedReason: `[${error.rule}] ${error.message}`,
             input: JSON.stringify(body),
             amountInPaise,
-            currency,
+            currency: "INR",
             requestId,
           },
         })
@@ -80,7 +95,7 @@ export async function POST(request: NextRequest) {
           error: message,
           input: JSON.stringify(body),
           amountInPaise,
-          currency,
+          currency: "INR",
           requestId,
         },
       })
@@ -88,3 +103,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ requestId, status: "FAILED", error: message }, { status: 502 });
   }
 }
+

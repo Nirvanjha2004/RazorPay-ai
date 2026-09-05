@@ -11,6 +11,9 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "dependencies": {
     "@prisma/client": "^5.20.0",
     "@radix-ui/react-slot": "^1.1.0",

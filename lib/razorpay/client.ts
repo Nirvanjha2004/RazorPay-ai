@@ -8,6 +8,7 @@
  * Docs: https://razorpay.com/docs/api/
  */
 
+import crypto from "crypto";
 import Razorpay from "razorpay";
 
 export type RazorpayOrder = {
@@ -49,6 +50,25 @@ export type RazorpayRefund = {
 
 let client: Razorpay | null = null;
 
+/**
+ * Extract a human-readable message from a Razorpay SDK error, which is
+ * typically `{ error: { description, code } }` rather than a real Error.
+ */
+function extractRazorpayError(error: unknown): string {
+  if (error && typeof error === "object") {
+    const e = error as { error?: { description?: string }; description?: string; message?: string };
+    if (e.error?.description) return e.error.description;
+    if (e.description) return e.description;
+    if (e.message) return e.message;
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+  return String(error);
+}
+
 export function getRazorpayClient(): Razorpay {
   if (client) return client;
 
@@ -81,24 +101,39 @@ export function getPublicKeyId(): string | null {
   return process.env.RAZORPAY_KEY_ID ?? null;
 }
 
-/** Create a standard Razorpay order. */
-export async function createOrder(params: {
-  amountInPaise: number;
-  currency?: string;
-  receipt?: string;
-  notes?: Record<string, string>;
-}): Promise<RazorpayOrder> {
-  const order = await getRazorpayClient().orders.create({
-    amount: params.amountInPaise,
-    currency: params.currency ?? "INR",
-    receipt: params.receipt,
-    notes: params.notes,
-  });
-  return order as unknown as RazorpayOrder;
+/**
+ * Create a Razorpay order via the Orders API (test mode).
+ *
+ * @param amountInPaise positive integer in the smallest currency unit (paise)
+ * @param notes         optional key-value metadata (propagated to Razorpay dashboard)
+ * @param receipt       optional internal receipt reference
+ */
+export async function createOrder(
+  amountInPaise: number,
+  notes?: Record<string, string>,
+  receipt?: string
+): Promise<RazorpayOrder> {
+  if (!Number.isInteger(amountInPaise) || amountInPaise <= 0) {
+    throw new Error(`createOrder: amount must be a positive integer in paise, got ${amountInPaise}`);
+  }
+  try {
+    const order = await getRazorpayClient().orders.create({
+      amount: amountInPaise,
+      currency: "INR",
+      receipt,
+      notes,
+    });
+    return order as unknown as RazorpayOrder;
+  } catch (error) {
+    throw new Error(`Razorpay Orders API failed: ${extractRazorpayError(error)}`);
+  }
 }
 
-/** Create a payment link that can be sent to a customer. */
-export async function createPaymentLink(params: {
+/**
+ * Create a standalone payment link that can be sent to a customer
+ * (used by the Payment Link agent).
+ */
+export async function createStandalonePaymentLink(params: {
   amountInPaise: number;
   currency?: string;
   description: string;
@@ -137,4 +172,68 @@ export async function refundPayment(params: {
     notes: params.notes,
   });
   return refund as unknown as RazorpayRefund;
+}
+
+/**
+ * Create a payment link as a FALLBACK for an existing Razorpay order —
+ * used when the standard checkout flow cannot complete (e.g. the customer
+ * cannot use the checkout, or a link needs to be re-sent).
+ *
+ * Fetches the order from Razorpay to get the exact amount, so no amount
+ * can be tampered with by the caller.
+ *
+ * @param orderId a Razorpay order id (`order_...`)
+ */
+export async function createPaymentLink(orderId: string): Promise<RazorpayPaymentLink> {
+  if (!orderId.startsWith("order_")) {
+    throw new Error(`createPaymentLink: expected a Razorpay order id (order_...), got "${orderId}"`);
+  }
+  try {
+    const client = getRazorpayClient();
+    const order = (await client.orders.fetch(orderId)) as unknown as RazorpayOrder;
+    if (!order?.amount) {
+      throw new Error(`Order ${orderId} not found on Razorpay`);
+    }
+    // The Razorpay API accepts links without a customer, but the SDK's TS
+    // types require it — the payload is cast since no customer is known here.
+    const payload = {
+      amount: order.amount,
+      currency: order.currency ?? "INR",
+      accept_partial: false,
+      reference_id: orderId,
+      description: `Complete payment for order ${orderId}`,
+      notify: { sms: false, email: true },
+      reminder_enable: true,
+    };
+    const link = await client.paymentLink.create(
+      payload as unknown as Parameters<typeof client.paymentLink.create>[0]
+    );
+    return link as unknown as RazorpayPaymentLink;
+  } catch (error) {
+    throw new Error(`Razorpay payment-link fallback for ${orderId} failed: ${extractRazorpayError(error)}`);
+  }
+}
+
+/**
+ * Verify a Razorpay webhook signature.
+ *
+ * Razorpay signs every webhook payload with HMAC-SHA256 using your webhook
+ * secret; the signature arrives in the `x-razorpay-signature` header.
+ * Comparison is timing-safe and requires the RAW request body.
+ *
+ * @param rawBody   the exact, unparsed request body string
+ * @param signature the value of the x-razorpay-signature header
+ * @throws if RAZORPAY_WEBHOOK_SECRET is not configured
+ */
+export function verifyPaymentSignature(rawBody: string, signature: string | null): boolean {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret) {
+    throw new Error("RAZORPAY_WEBHOOK_SECRET is not configured — cannot verify webhooks");
+  }
+  if (!signature || !rawBody) return false;
+
+  const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+  const expectedBuf = Buffer.from(expected, "utf8");
+  const receivedBuf = Buffer.from(signature, "utf8");
+  return expectedBuf.length === receivedBuf.length && crypto.timingSafeEqual(expectedBuf, receivedBuf);
 }
