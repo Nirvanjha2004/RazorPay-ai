@@ -45,34 +45,34 @@ export const AGENT_STYLES: Record<
   { label: string; initials: string; avatar: string; badge: string }
 > = {
   GROWTH: {
-    label: "GROWTH AGENT",
+    label: "Growth",
     initials: "GR",
-    avatar: "border-emerald-500/40 bg-emerald-500/15 text-emerald-300",
-    badge: "border-emerald-500/40 bg-emerald-500/10 text-emerald-400",
+    avatar: "bg-violet-600 text-white",
+    badge: "bg-violet-50 text-violet-700 ring-violet-200",
   },
   CHECKOUT: {
-    label: "CHECKOUT AGENT",
+    label: "Checkout",
     initials: "CK",
-    avatar: "border-sky-500/40 bg-sky-500/15 text-sky-300",
-    badge: "border-sky-500/40 bg-sky-500/10 text-sky-400",
+    avatar: "bg-[#204CF5] text-white",
+    badge: "bg-blue-50 text-[#204CF5] ring-blue-200",
   },
   GUARDIAN: {
-    label: "GUARDIAN AGENT",
+    label: "Guardian",
     initials: "GD",
-    avatar: "border-amber-500/40 bg-amber-500/15 text-amber-300",
-    badge: "border-amber-500/40 bg-amber-500/10 text-amber-400",
+    avatar: "bg-amber-500 text-white",
+    badge: "bg-amber-50 text-amber-800 ring-amber-200",
   },
   SYSTEM: {
-    label: "AGENT",
+    label: "System",
     initials: "SY",
-    avatar: "border-zinc-600 bg-zinc-800 text-zinc-300",
-    badge: "border-zinc-700 bg-zinc-900 text-zinc-400",
+    avatar: "bg-slate-700 text-white",
+    badge: "bg-slate-50 text-slate-700 ring-slate-200",
   },
   CUSTOMER: {
-    label: "CUSTOMER",
+    label: "Customer",
     initials: "CU",
-    avatar: "border-violet-500/40 bg-violet-500/15 text-violet-300",
-    badge: "border-violet-500/40 bg-violet-500/10 text-violet-400",
+    avatar: "bg-slate-900 text-white",
+    badge: "bg-slate-900 text-white ring-slate-900",
   },
 };
 
@@ -80,13 +80,13 @@ export function statusChip(status: string): { icon: string; cls: string } {
   switch (status) {
     case "APPROVED":
     case "SUCCESS":
-      return { icon: "✅", cls: "text-emerald-400" };
+      return { icon: "●", cls: "text-emerald-600" };
     case "NEEDS_APPROVAL":
-      return { icon: "🔒", cls: "text-amber-400" };
+      return { icon: "●", cls: "text-amber-600" };
     case "BLOCKED":
     case "FAILED":
-      return { icon: "❌", cls: "text-red-400" };
+      return { icon: "●", cls: "text-red-600" };
     default:
-      return { icon: "•", cls: "text-zinc-500" };
+      return { icon: "●", cls: "text-slate-400" };
   }
 }

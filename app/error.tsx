@@ -3,10 +3,6 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-/**
- * App-router error boundary (catches render/load errors in any page segment).
- * Every failure also surfaces as a sonner toast.
- */
 export default function ErrorPage({
   error,
   reset,
@@ -22,17 +18,18 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <div className="grid h-full place-items-center bg-[#050507] p-8 font-mono text-center">
-      <div>
-        <p className="text-lg font-bold text-red-400">SYSTEM FAULT</p>
-        <p className="mt-2 max-w-md text-sm text-zinc-400">
+    <div className="grid min-h-[60vh] place-items-center p-8 text-center">
+      <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">!</div>
+        <p className="mt-3 text-sm font-semibold text-slate-900">Something went wrong</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
           {error.message || "An unexpected error occurred."}
         </p>
         <button
           onClick={reset}
-          className="mt-5 rounded border border-emerald-500/50 bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/25"
+          className="mt-5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
         >
-          ↻ RETRY
+          Try again
         </button>
       </div>
     </div>

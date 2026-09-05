@@ -63,6 +63,14 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        saas: "0 1px 3px rgba(15,23,42,0.04), 0 4px 12px rgba(15,23,42,0.06), 0 0 0 1px rgba(15,23,42,0.04)",
+        "saas-lg": "0 8px 30px rgba(15,23,42,0.08), 0 0 0 1px rgba(15,23,42,0.06)",
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

@@ -25,23 +25,23 @@ interface ReplayData {
 }
 
 const AC: Record<string, string> = {
-  GROWTH: "text-emerald-400", CHECKOUT: "text-sky-400", GUARDIAN: "text-amber-400",
-  BUYER: "text-violet-400", SYSTEM: "text-zinc-400", CUSTOMER: "text-zinc-300",
+  GROWTH: "text-violet-700", CHECKOUT: "text-[#204CF5]", GUARDIAN: "text-amber-700",
+  BUYER: "text-violet-700", SYSTEM: "text-slate-600", CUSTOMER: "text-slate-700",
 };
 const AB: Record<string, string> = {
-  GROWTH: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  CHECKOUT: "border-sky-500/40 bg-sky-500/10 text-sky-300",
-  GUARDIAN: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  BUYER: "border-violet-500/40 bg-violet-500/10 text-violet-300",
-  SYSTEM: "border-zinc-600 bg-zinc-800 text-zinc-300",
-  CUSTOMER: "border-zinc-600 bg-zinc-800 text-zinc-200",
+  GROWTH: "bg-violet-50 text-violet-700 ring-violet-200",
+  CHECKOUT: "bg-blue-50 text-[#204CF5] ring-blue-200",
+  GUARDIAN: "bg-amber-50 text-amber-800 ring-amber-200",
+  BUYER: "bg-violet-50 text-violet-700 ring-violet-200",
+  SYSTEM: "bg-slate-50 text-slate-700 ring-slate-200",
+  CUSTOMER: "bg-slate-900 text-white ring-slate-900",
 };
 
 const StatusIcon = ({ s }: { s: string }) => {
-  if (s === "SUCCESS" || s === "APPROVED") return <CheckCircle2 className="h-4 w-4 text-emerald-400" />;
-  if (s === "BLOCKED") return <XCircle className="h-4 w-4 text-red-400" />;
-  if (s === "NEEDS_APPROVAL") return <AlertTriangle className="h-4 w-4 text-amber-400" />;
-  return <XCircle className="h-4 w-4 text-red-400" />;
+  if (s === "SUCCESS" || s === "APPROVED") return <CheckCircle2 className="h-4 w-4 text-emerald-600" />;
+  if (s === "BLOCKED") return <XCircle className="h-4 w-4 text-red-500" />;
+  if (s === "NEEDS_APPROVAL") return <AlertTriangle className="h-4 w-4 text-amber-500" />;
+  return <XCircle className="h-4 w-4 text-red-500" />;
 };
 
 const fmt = (p: number | null) => (p == null ? "—" : `₹${(p / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`);
@@ -77,13 +77,13 @@ export default function ReplayPage() {
   const stepBack = useCallback(() => setStepIndex((i) => Math.max(i - 1, 0)), []);
   const restart = useCallback(() => { setStepIndex(0); setPlaying(true); }, []);
 
-  if (loading) return <div className="grid h-full place-items-center bg-[#050507] font-mono text-zinc-400"><span className="h-3 w-3 animate-pulse rounded-full bg-emerald-400" /> Loading replay…</div>;
+  if (loading) return <div className="grid h-[60vh] place-items-center text-sm text-slate-500"><span className="h-2 w-2 animate-pulse rounded-full bg-[#204CF5]" /> Loading replay…</div>;
   if (error || !data) return (
-    <div className="grid h-full place-items-center bg-[#050507] p-8 text-center font-mono">
-      <div>
-        <p className="text-lg font-bold text-red-400">REPLAY NOT FOUND</p>
-        <p className="mt-2 text-sm text-zinc-400">{error ?? "No data for this session."}</p>
-        <Link href="/audit" className="mt-4 inline-flex items-center gap-2 text-sm text-emerald-400 hover:underline"><ArrowLeft className="h-4 w-4" /> Back to Audit Trail</Link>
+    <div className="grid h-[60vh] place-items-center p-8 text-center">
+      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <p className="text-sm font-semibold text-slate-900">Replay not found</p>
+        <p className="mt-1 text-sm text-slate-500">{error ?? "No data for this session."}</p>
+        <Link href="/audit" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#204CF5] hover:underline"><ArrowLeft className="h-4 w-4" /> Back to Audit Trail</Link>
       </div>
     </div>
   );
@@ -93,62 +93,65 @@ export default function ReplayPage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-full flex-col bg-[#050507] font-mono text-[13px] text-zinc-200">
-        <header className="flex items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 py-2">
-          <div className="flex items-center gap-3">
-            <Link href="/audit" className="text-zinc-500 hover:text-zinc-300"><ArrowLeft className="h-4 w-4" /></Link>
-            <span className="text-sm font-bold tracking-widest">SESSION REPLAY <span className="text-emerald-400">▶</span></span>
-            <span className="text-[10px] text-zinc-500">{sessionId}</span>
-          </div>
-          <span className="text-[11px] text-zinc-500">{data.source.toUpperCase()} · {data.steps.length} steps</span>
-        </header>
-
-        <div className="flex items-center gap-3 border-b border-zinc-800 bg-[#07070a] px-4 py-2">
-          <button onClick={stepBack} disabled={stepIndex === 0} className="rounded border border-zinc-700 p-1.5 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 disabled:opacity-30"><SkipBack className="h-4 w-4" /></button>
-          <button onClick={() => setPlaying(!playing)} className="rounded border border-emerald-500/50 bg-emerald-500/15 p-1.5 text-emerald-300 hover:bg-emerald-500/25">{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}</button>
-          <button onClick={stepForward} disabled={stepIndex >= data.steps.length - 1} className="rounded border border-zinc-700 p-1.5 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 disabled:opacity-30"><SkipForward className="h-4 w-4" /></button>
-          <button onClick={restart} className="rounded border border-zinc-700 p-1.5 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"><RotateCcw className="h-4 w-4" /></button>
-          <div className="ml-auto text-[11px] text-zinc-500">STEP <span className="text-zinc-200">{stepIndex + 1}</span> / {data.steps.length}</div>
-        </div>
-
-        <div className="h-1 bg-zinc-900"><motion.div className="h-full bg-emerald-500" animate={{ width: `${((stepIndex + 1) / data.steps.length) * 100}%` }} transition={{ duration: 0.3 }} /></div>
-
-        <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
-          <AnimatePresence>
-            {visible.map((step, i) => (
-              <motion.div key={step.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-                className={`mb-3 rounded-lg border p-3 ${i === stepIndex ? "border-emerald-500/40 bg-emerald-500/5" : "border-zinc-800/60 bg-zinc-950/40"}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-2">
-                    <StatusIcon s={step.status} />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs font-bold ${AC[step.agent] ?? "text-zinc-300"}`}>{step.agent}</span>
-                        <span className={`rounded border px-1.5 py-0.5 text-[10px] ${AB[step.agent] ?? "border-zinc-700 text-zinc-400"}`}>{step.action}</span>
-                        {step.amount != null && <span className="text-[11px] text-zinc-400">{fmt(step.amount)}</span>}
-                      </div>
-                      {step.reasoning && <p className="mt-1 max-w-2xl text-xs leading-relaxed text-zinc-400">{step.reasoning}</p>}
-                      {step.error && <p className="mt-1 text-xs text-red-400/80">{step.error}</p>}
-                    </div>
-                  </div>
-                  <span className="shrink-0 text-[10px] text-zinc-600">{new Date(step.at).toLocaleTimeString("en-GB")}</span>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-
-        {cur && (
-          <div className="border-t border-zinc-800 bg-[#07070a] px-4 py-3">
-            <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-              <span className={`font-bold ${AC[cur.agent] ?? "text-zinc-300"}`}>{cur.agent}</span><span>·</span><span>{cur.action}</span><span>·</span>
-              <span className={cur.status === "SUCCESS" || cur.status === "APPROVED" ? "text-emerald-400" : cur.status === "BLOCKED" ? "text-red-400" : "text-amber-400"}>{cur.status}</span>
+      <div className="mx-auto max-w-[900px] px-6 py-6">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <header className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Link href="/audit" className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-600 hover:bg-slate-50"><ArrowLeft className="h-4 w-4" /></Link>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Session replay</p>
+                <p className="font-mono text-xs text-slate-500">{sessionId}</p>
+              </div>
             </div>
-            {cur.reasoning && <p className="mt-1 text-xs text-zinc-300">{cur.reasoning}</p>}
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200">{data.source} · {data.steps.length} steps</span>
+          </header>
+
+          <div className="flex items-center gap-2 border-b border-slate-100 bg-white px-4 py-2">
+            <button onClick={stepBack} disabled={stepIndex === 0} className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 disabled:opacity-30"><SkipBack className="h-4 w-4" /></button>
+            <button onClick={() => setPlaying(!playing)} className="rounded-xl bg-slate-900 p-2 text-white hover:bg-slate-800">{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}</button>
+            <button onClick={stepForward} disabled={stepIndex >= data.steps.length - 1} className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 disabled:opacity-30"><SkipForward className="h-4 w-4" /></button>
+            <button onClick={restart} className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50"><RotateCcw className="h-4 w-4" /></button>
+            <div className="ml-auto text-xs text-slate-500">Step <span className="font-semibold text-slate-900">{stepIndex + 1}</span> / {data.steps.length}</div>
           </div>
-        )}
+
+          <div className="h-1 bg-slate-100"><motion.div className="h-full bg-[#204CF5]" animate={{ width: `${((stepIndex + 1) / data.steps.length) * 100}%` }} transition={{ duration: 0.3 }} /></div>
+
+          <div className="space-y-3 bg-[#F9F8F6] p-4">
+            <AnimatePresence>
+              {visible.map((step, i) => (
+                <motion.div key={step.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
+                  className={`rounded-xl border p-4 ${i === stepIndex ? "border-[#204CF5]/30 bg-white shadow-sm" : "border-slate-200 bg-white"}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <StatusIcon s={step.status} />
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`text-xs font-bold ${AC[step.agent] ?? "text-slate-700"}`}>{step.agent}</span>
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ${AB[step.agent] ?? "bg-slate-50 text-slate-700 ring-slate-200"}`}>{step.action}</span>
+                          {step.amount != null && <span className="font-mono text-xs font-medium text-slate-600">{fmt(step.amount)}</span>}
+                        </div>
+                        {step.reasoning && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-600">{step.reasoning}</p>}
+                        {step.error && <p className="mt-1 text-sm text-red-600">{step.error}</p>}
+                      </div>
+                    </div>
+                    <span className="shrink-0 font-mono text-xs text-slate-400">{new Date(step.at).toLocaleTimeString("en-GB")}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {cur && (
+            <div className="border-t border-slate-200 bg-white px-4 py-3">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <span className={`font-bold ${AC[cur.agent] ?? "text-slate-700"}`}>{cur.agent}</span><span>·</span><span>{cur.action}</span><span>·</span>
+                <span className={cur.status === "SUCCESS" || cur.status === "APPROVED" ? "font-semibold text-emerald-700" : cur.status === "BLOCKED" ? "font-semibold text-red-600" : "font-semibold text-amber-700"}>{cur.status}</span>
+              </div>
+              {cur.reasoning && <p className="mt-1 text-sm text-slate-700">{cur.reasoning}</p>}
+            </div>
+          )}
+        </div>
       </div>
     </ErrorBoundary>
   );
 }
-

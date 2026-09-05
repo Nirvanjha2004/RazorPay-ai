@@ -12,16 +12,16 @@ export function AuditPanel({ logs }: { logs: AuditLogRow[] }) {
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-zinc-800 px-4 py-2">
-        <div className="text-xs tracking-widest text-zinc-400">AUDIT TRAIL — MONEY ACTIONS</div>
-        <div className="text-[10px] text-zinc-600">{logs.length} records</div>
+      <header className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-4 py-3">
+        <p className="text-xs font-semibold tracking-wide text-slate-700">Audit trail · Money actions</p>
+        <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200">{logs.length} records</span>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
         {logs.length === 0 ? (
-          <p className="mt-8 text-center text-xs text-zinc-600">No money actions yet.</p>
+          <p className="py-10 text-center text-sm text-slate-500">No money actions yet.</p>
         ) : (
-          <table className="w-full text-left text-[11px]">
+          <table className="w-full text-left text-xs">
             <tbody>
               {logs.map((log) => {
                 const chip = statusChip(log.status);
@@ -31,51 +31,51 @@ export function AuditPanel({ logs }: { logs: AuditLogRow[] }) {
                   <Fragment key={log.id}>
                     <tr
                       onClick={() => setExpandedId(expanded ? null : log.id)}
-                      className="cursor-pointer border-b border-zinc-900 hover:bg-zinc-900/50"
+                      className="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
                     >
-                      <td className="whitespace-nowrap py-1.5 pl-3 pr-2 font-mono text-[10px] text-zinc-500">
+                      <td className="whitespace-nowrap py-2.5 pl-4 pr-2 font-mono text-xs text-slate-500">
                         {formatDateTime(log.createdAt).split(", ")[1]}
                       </td>
-                      <td className="py-1.5 pr-2">
-                        <span className={`rounded border px-1 py-0.5 text-[9px] font-bold ${agentStyle.badge}`}>
+                      <td className="py-2.5 pr-2">
+                        <span className={`rounded-full px-2 py-1 text-xs font-semibold ring-1 ${agentStyle.badge.replace("border","ring")}`}>
                           {log.agentType}
                         </span>
                       </td>
-                      <td className="max-w-24 truncate py-1.5 pr-2 font-mono text-zinc-300" title={log.action}>
+                      <td className="max-w-24 truncate py-2.5 pr-2 font-mono text-xs text-slate-700" title={log.action}>
                         {log.action}
                       </td>
-                      <td className="whitespace-nowrap py-1.5 pr-2 text-right font-mono text-zinc-400">
+                      <td className="whitespace-nowrap py-2.5 pr-2 text-right font-mono text-xs font-medium text-slate-700">
                         {log.amountInPaise != null ? formatINR(log.amountInPaise) : "—"}
                       </td>
-                      <td className={`whitespace-nowrap py-1.5 pr-3 font-semibold ${chip.cls}`}>
-                        {chip.icon} {log.status}
+                      <td className={`whitespace-nowrap py-2.5 pr-4 text-xs font-semibold ${chip.cls}`}>
+                        {log.status}
                       </td>
                     </tr>
                     {expanded && (
-                      <tr className="border-b border-zinc-900 bg-zinc-950">
-                        <td colSpan={5} className="px-3 py-2">
+                      <tr className="border-b border-slate-100 bg-slate-50">
+                        <td colSpan={5} className="px-4 py-3">
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="space-y-1 font-mono text-[10px] leading-relaxed"
+                            className="space-y-1 font-mono text-xs leading-relaxed"
                           >
-                            <p className="text-zinc-400">
-                              <span className="text-zinc-600">REASONING: </span>
+                            <p className="text-slate-700">
+                              <span className="font-semibold text-slate-900">Reasoning: </span>
                               {log.reasoning ?? log.blockedReason ?? "—"}
                             </p>
                             {log.error && (
-                              <p className="text-red-400">
-                                <span className="text-zinc-600">ERROR: </span>
+                              <p className="text-red-600">
+                                <span className="font-semibold">Error: </span>
                                 {log.error}
                               </p>
                             )}
                             {log.output && (
-                              <p className="break-all text-sky-400">
-                                <span className="text-zinc-600">OUTPUT: </span>
+                              <p className="break-all text-[#204CF5]">
+                                <span className="font-semibold text-slate-700">Output: </span>
                                 {log.output}
                               </p>
                             )}
-                            <p className="text-zinc-600">
+                            <p className="text-slate-400">
                               id: {log.id} · session: {log.requestId ?? "—"}
                             </p>
                           </motion.div>
