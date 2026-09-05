@@ -215,6 +215,38 @@ export async function createPaymentLink(orderId: string): Promise<RazorpayPaymen
 }
 
 /**
+ * Create a payment link for a raw amount — used by the conversational
+ * checkout as a last-resort fallback when no Razorpay order exists
+ * (e.g. the Orders API itself is failing).
+ */
+export async function createPaymentLinkForAmount(
+  amountInPaise: number,
+  description: string
+): Promise<RazorpayPaymentLink> {
+  if (!Number.isInteger(amountInPaise) || amountInPaise <= 0) {
+    throw new Error(`createPaymentLinkForAmount: invalid amount ${amountInPaise}`);
+  }
+  try {
+    const client = getRazorpayClient();
+    const payload = {
+      amount: amountInPaise,
+      currency: "INR",
+      accept_partial: false,
+      description,
+      notify: { sms: false, email: true },
+      reminder_enable: true,
+    };
+    // Razorpay API accepts links without a customer; SDK types require one.
+    const link = await client.paymentLink.create(
+      payload as unknown as Parameters<typeof client.paymentLink.create>[0]
+    );
+    return link as unknown as RazorpayPaymentLink;
+  } catch (error) {
+    throw new Error(`Razorpay payment link creation failed: ${extractRazorpayError(error)}`);
+  }
+}
+
+/**
  * Verify a Razorpay webhook signature.
  *
  * Razorpay signs every webhook payload with HMAC-SHA256 using your webhook
