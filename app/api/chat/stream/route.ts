@@ -67,6 +67,16 @@ export async function GET(request: NextRequest) {
   // 3. Guardian session status ------------------------------------------------
   const ledger = getGuardian().getSessionSpend(sessionId);
 
+  // 4. Order status for Pay CTA hide/show
+  let orderStatus: string | null = null;
+  if (session.context.orderId) {
+    const o = await prisma.order.findUnique({
+      where: { razorpayOrderId: session.context.orderId },
+      select: { status: true },
+    });
+    orderStatus = o?.status ?? null;
+  }
+
   return NextResponse.json({
     sessionId,
     phase: session.phase,
@@ -81,5 +91,6 @@ export async function GET(request: NextRequest) {
     orderId: session.context.orderId ?? null,
     paymentLinkUrl: session.context.paymentLinkUrl ?? null,
     amountPaise: session.cart.reduce((s, i) => s + i.priceInPaise * i.quantity, 0) || null,
+    orderStatus,
   });
 }

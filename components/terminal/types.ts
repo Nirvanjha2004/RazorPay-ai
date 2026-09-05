@@ -26,6 +26,7 @@ export interface StreamResponse {
   orderId?: string | null;
   paymentLinkUrl?: string | null;
   amountPaise?: number | null;
+  orderStatus?: string | null;
 }
 
 export interface AuditLogRow {

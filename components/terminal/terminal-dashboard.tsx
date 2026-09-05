@@ -181,10 +181,12 @@ export function TerminalDashboard() {
     setTransitionState("idle");
   }, []);
 
-  // Pay CTA — show when order exists & not awaiting approval
-  const payOrderId = (view as StreamResponse & { orderId?: string | null }).orderId ?? null;
-  const payAmount = (view as StreamResponse & { amountPaise?: number | null }).amountPaise ?? null;
-  const showPay = !!payOrderId && view.phase === "AWAITING_PAYMENT" && !isAwaiting;
+  // Pay CTA — show when order exists & not awaiting approval & not already PAID
+  const payOrderId = (view as StreamResponse).orderId ?? null;
+  const payAmount = (view as StreamResponse).amountPaise ?? null;
+  const orderStatus = (view as StreamResponse).orderStatus ?? null;
+  const showPay = !!payOrderId && view.phase === "AWAITING_PAYMENT" && !isAwaiting && orderStatus !== "PAID";
+  const showPaidSuccess = !!payOrderId && orderStatus === "PAID";
 
   // Stats derived from audit logs + feed
   const stats = (() => {
@@ -306,7 +308,15 @@ export function TerminalDashboard() {
 
         {/* Center: live agent activity */}
         <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          {showPay && payOrderId && (
+          {showPaidSuccess && payOrderId ? (
+            <div className="flex items-center gap-2 border-b border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white">✓</span>
+              Order {payOrderId.slice(0, 16)}… is <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold ring-1 ring-emerald-200">PAID</span> — you can start a new order.
+              <button onClick={() => sendMessage("I want the French Press")} className="ml-auto rounded-xl bg-emerald-600 px-3 py-1 text-xs font-bold text-white hover:bg-emerald-700">
+                New order →
+              </button>
+            </div>
+          ) : showPay && payOrderId ? (
             <div className="border-b border-slate-200 bg-emerald-50/70 p-3">
               <p className="mb-2 text-xs font-semibold tracking-wide text-emerald-800">Ready to pay — Razorpay Checkout attached</p>
               <RazorpayCheckoutButton orderId={payOrderId} amountPaise={payAmount} sessionId={sessionId} />
@@ -314,7 +324,7 @@ export function TerminalDashboard() {
                 Order {payOrderId} is <span className="font-semibold text-slate-700">CREATED</span> — pay now to fire webhook → status becomes <span className="font-semibold text-emerald-700">PAID</span>. Then ask “what is my order status?” again.
               </p>
             </div>
-          )}
+          ) : null}
           <div className="min-h-0 flex-1 overflow-hidden">
             <ActivityFeed
               feed={view.feed}
