@@ -78,5 +78,8 @@ export async function GET(request: NextRequest) {
       maxOrders: MAX_SESSION_ORDERS,
       pendingApproval: session.context.pendingApproval ?? null,
     },
+    orderId: session.context.orderId ?? null,
+    paymentLinkUrl: session.context.paymentLinkUrl ?? null,
+    amountPaise: session.cart.reduce((s, i) => s + i.priceInPaise * i.quantity, 0) || null,
   });
 }

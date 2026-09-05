@@ -13,6 +13,7 @@ import { GuardianCard } from "./guardian-card";
 import { CustomerChat } from "./customer-chat";
 import { GuardianStatsStrip } from "./guardian-stats";
 import { AiBuyerDemo } from "@/components/ai-buyer/ai-buyer-demo";
+import { RazorpayCheckoutButton } from "@/components/razorpay-checkout-button";
 
 const SESSION_KEY = "commerceagent_session_id";
 const EMPTY_STREAM: StreamResponse = {
@@ -180,6 +181,11 @@ export function TerminalDashboard() {
     setTransitionState("idle");
   }, []);
 
+  // Pay CTA — show when order exists & not awaiting approval
+  const payOrderId = (view as StreamResponse & { orderId?: string | null }).orderId ?? null;
+  const payAmount = (view as StreamResponse & { amountPaise?: number | null }).amountPaise ?? null;
+  const showPay = !!payOrderId && view.phase === "AWAITING_PAYMENT" && !isAwaiting;
+
   // Stats derived from audit logs + feed
   const stats = (() => {
     const logs = audit?.logs ?? [];
@@ -299,14 +305,25 @@ export function TerminalDashboard() {
         </div>
 
         {/* Center: live agent activity */}
-        <div className="min-h-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <ActivityFeed
-            feed={view.feed}
-            phase={view.phase}
-            pendingApproval={isAwaiting}
-            recoverySteps={recoverySteps}
-            recoveryActive={recoveryActive}
-          />
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {showPay && payOrderId && (
+            <div className="border-b border-slate-200 bg-emerald-50/70 p-3">
+              <p className="mb-2 text-xs font-semibold tracking-wide text-emerald-800">Ready to pay — Razorpay Checkout attached</p>
+              <RazorpayCheckoutButton orderId={payOrderId} amountPaise={payAmount} sessionId={sessionId} />
+              <p className="mt-2 text-xs text-slate-500">
+                Order {payOrderId} is <span className="font-semibold text-slate-700">CREATED</span> — pay now to fire webhook → status becomes <span className="font-semibold text-emerald-700">PAID</span>. Then ask “what is my order status?” again.
+              </p>
+            </div>
+          )}
+          <div className="min-h-0 flex-1 overflow-hidden">
+            <ActivityFeed
+              feed={view.feed}
+              phase={view.phase}
+              pendingApproval={isAwaiting}
+              recoverySteps={recoverySteps}
+              recoveryActive={recoveryActive}
+            />
+          </div>
         </div>
 
         {/* Right: guardian + audit trail */}

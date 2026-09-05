@@ -23,6 +23,9 @@ export interface StreamResponse {
   phase: string;
   feed: FeedEntry[];
   guardian: GuardianStatus;
+  orderId?: string | null;
+  paymentLinkUrl?: string | null;
+  amountPaise?: number | null;
 }
 
 export interface AuditLogRow {
