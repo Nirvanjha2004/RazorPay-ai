@@ -33,6 +33,10 @@ model Order {
   receipt               String?
   // CREATED | LINK_SENT | PAID | FAILED
   status                String   @default("CREATED")
+  // Which surface created this order: manual | chat | baseline | agent (simulation)
+  channel               String   @default("manual")
+  // JSON [{ productId, name, priceInPaise, quantity }]
+  itemsJson             String?
   notes                 String? // JSON string
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
