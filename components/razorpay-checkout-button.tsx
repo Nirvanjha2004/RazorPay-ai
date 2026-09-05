@@ -58,8 +58,14 @@ export function RazorpayCheckoutButton({ orderId, amountPaise, sessionId }: Prop
         order_id: orderId,
         handler: function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
           toast.success(`Payment captured: ${response.razorpay_payment_id}`, {
-            description: "Webhook will mark order as PAID — check Audit trail in ~2s",
+            description: "Marking order as PAID — check Audit trail in ~1s",
           });
+          // Fallback: directly mark PAID (webhook may lag / ngrok url changed)
+          fetch("/api/payments/mark-paid", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId, paymentId: response.razorpay_payment_id }),
+          }).catch(() => undefined);
           // Optimistically nudge user to check status
           if (sessionId) {
             fetch("/api/chat", {
@@ -113,7 +119,7 @@ export function RazorpayCheckoutButton({ orderId, amountPaise, sessionId }: Prop
         {opening ? "Opening Razorpay…" : `Pay ${amountPaise ? `₹${(amountPaise / 100).toFixed(2)}` : ""} with Razorpay`}
       </button>
       <p className="flex items-center gap-1 text-xs text-slate-500">
-        Test card: 4111 1111 1111 1111 · Exp any future · CVV any · OTP 1234 <ExternalLink className="h-3 w-3" />
+        Test card: 5267 3181 8797 5449 · Exp any future · CVV any · OTP 1234 <ExternalLink className="h-3 w-3" />
       </p>
     </div>
   );
