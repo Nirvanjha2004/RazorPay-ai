@@ -48,6 +48,8 @@ model AuditLog {
   status            String // "SUCCESS" | "FAILED" | "BLOCKED"
   // Guardrail metadata (populated when a run is blocked)
   blockedReason     String?
+  // Agent reasoning (multi-agent system: GROWTH / CHECKOUT / GUARDIAN)
+  reasoning         String?
   // Request/response payloads stored as JSON strings (SQLite-friendly)
   input             String
   output            String?
