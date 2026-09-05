@@ -85,7 +85,7 @@ export function TerminalDashboard() {
   }, []);
 
   return (
-    <div className="flex h-[calc(100vh-56px)] flex-col bg-[#F9F8F6]">
+    <div className="flex h-[calc(100vh-92px)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3">
         <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export function TerminalDashboard() {
       </div>
 
       {/* Three-column body */}
-      <div className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[320px_1fr_380px]">
+      <div className="grid min-h-0 flex-1 gap-4 bg-[#F9F8F6] p-4 lg:grid-cols-[320px_1fr_380px]">
         {/* Left: customer simulator */}
         <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <CustomerChat feed={view.feed} busy={busy} onSend={sendMessage} />
