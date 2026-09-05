@@ -1,0 +1,38 @@
+// Prisma schema for CommerceAgent — SQLite audit log & agent run history
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AuditLog {
+  id                String    @id @default(cuid())
+  // Agent metadata
+  agentType         String // e.g. "payment-link" | "refund" | "payment-status"
+  action            String // e.g. "create_payment_link" | "refund_payment"
+  status            String // "SUCCESS" | "FAILED" | "BLOCKED"
+  // Guardrail metadata (populated when a run is blocked)
+  blockedReason     String?
+  // Request/response payloads stored as JSON strings (SQLite-friendly)
+  input             String
+  output            String?
+  error             String?
+  // Money fields are stored in the smallest currency unit (paise)
+  amountInPaise     Int?
+  currency          String?
+  // Razorpay identifiers
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpayRefundId  String?
+  // Correlation
+  requestId         String?
+  createdAt         DateTime  @default(now())
+
+  @@index([agentType])
+  @@index([status])
+  @@index([createdAt])
+}
