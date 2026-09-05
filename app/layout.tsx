@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import { Sidebar } from "@/components/sidebar";
 import "./globals.css";
 
@@ -17,6 +18,7 @@ export default function RootLayout({
         <Sidebar />
         {/* Pages manage their own layout — the terminal needs full bleed. */}
         <main className="h-screen overflow-hidden pl-60">{children}</main>
+        <Toaster theme="dark" position="bottom-right" richColors />
       </body>
     </html>
   );

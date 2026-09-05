@@ -7,7 +7,8 @@ import { Bot, LayoutDashboard, ReceiptText, Settings, BarChart3, Zap } from "luc
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "Home", icon: LayoutDashboard },
+  { href: "/terminal", label: "Terminal", icon: Zap },
   { href: "/agents", label: "Agents", icon: Bot },
   { href: "/audit", label: "Audit Trail", icon: ReceiptText },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
