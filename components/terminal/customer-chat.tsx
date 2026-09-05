@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import type { FeedEntry } from "./types";
 
@@ -15,12 +16,18 @@ interface Props {
   feed: FeedEntry[];
   busy: boolean;
   onSend: (text: string) => void;
+  recoveryMessage?: string | null;
 }
 
 /** Left panel: the dashboard user plays the customer. */
-export function CustomerChat({ feed, busy, onSend }: Props) {
+export function CustomerChat({ feed, busy, onSend, recoveryMessage }: Props) {
   const [draft, setDraft] = useState("");
   const conversation = feed.filter((entry) => entry.agent === "CUSTOMER" || entry.agent === "SYSTEM");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [conversation.length, recoveryMessage]);
 
   function send(text: string) {
     if (!text.trim() || busy) return;
@@ -37,8 +44,8 @@ export function CustomerChat({ feed, busy, onSend }: Props) {
         </span>
       </header>
 
-      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto bg-white p-3 scrollbar-thin">
-        {conversation.length === 0 && (
+      <div ref={scrollRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto bg-white p-3 scrollbar-thin">
+        {conversation.length === 0 && !recoveryMessage && (
           <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center">
             <p className="text-sm font-medium text-slate-700">Start a conversation</p>
             <p className="mt-1 text-xs leading-relaxed text-slate-500">
@@ -62,6 +69,24 @@ export function CustomerChat({ feed, busy, onSend }: Props) {
             </div>
           );
         })}
+
+        <AnimatePresence>
+          {recoveryMessage && (
+            <motion.div
+              key="recovery-msg"
+              initial={{ opacity: 0, y: 12, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="flex justify-start"
+            >
+              <div className="max-w-[90%] rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm leading-relaxed text-emerald-900 shadow-sm">
+                <p className="text-xs font-semibold text-emerald-700">Agent → Customer (graceful fallback)</p>
+                <p className="mt-1">{recoveryMessage}</p>
+                <p className="mt-1 text-xs text-emerald-700/70">via secure payment link · no retry prompt fatigue</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Quick actions */}

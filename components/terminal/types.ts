@@ -90,3 +90,28 @@ export function statusChip(status: string): { icon: string; cls: string } {
       return { icon: "●", cls: "text-slate-400" };
   }
 }
+
+export function isGuardianGate(entry: FeedEntry): boolean {
+  return entry.agent === "GUARDIAN";
+}
+
+export function parseGateMeta(entry: FeedEntry): { rule: string | null; reason: string } {
+  const text = entry.text;
+  // rule is often logged as [rule] or in reasoning
+  const bracket = text.match(/\[([^\]]+)\]/);
+  const rule = bracket?.[1] ?? null;
+  // reason is the detail after "—"
+  const parts = text.split("—");
+  const reason = parts.length > 1 ? parts.slice(1).join("—").trim() : text;
+  return { rule, reason };
+}
+
+export function extractAmount(entry: FeedEntry): number | null {
+  // try ₹ amount in text
+  const m = entry.text.match(/₹\s?([\d,]+\.\d{2}|[\d,]+)/);
+  if (m) {
+    const num = Number(m[1].replace(/,/g, ""));
+    if (!Number.isNaN(num)) return Math.round(num * 100);
+  }
+  return null;
+}
