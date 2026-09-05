@@ -14,6 +14,8 @@ import {
   Search,
   Sparkles,
   ExternalLink,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -29,40 +31,64 @@ const opsNav = [
   { href: "/analytics", label: "Revenue", icon: BarChart3 },
 ];
 
-export function Sidebar() {
+export function Sidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
   const pathname = usePathname();
+  const isCollapsed = !!collapsed;
 
   return (
-    <aside className="fixed left-3 top-3 bottom-3 z-30 flex w-[268px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.12),0_4px_16px_rgba(15,23,42,0.06),0_0_0_1px_rgba(15,23,42,0.04)]">
+    <aside
+      className={cn(
+        "fixed bottom-3 top-3 z-30 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.12),0_4px_16px_rgba(15,23,42,0.06),0_0_0_1px_rgba(15,23,42,0.04)] transition-all duration-300 ease-in-out",
+        isCollapsed ? "left-3 w-[68px]" : "left-3 w-[268px]"
+      )}
+    >
+      {/* Toggle */}
+      <button
+        onClick={onToggle}
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm hover:bg-slate-50 hover:text-slate-700"
+        title={isCollapsed ? "Expand" : "Collapse"}
+      >
+        {isCollapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
+      </button>
+
       {/* Org switcher */}
-      <div className="border-b border-slate-100 px-4 py-4">
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0F172A] text-white shadow-sm">
+      <div className={cn("border-b border-slate-100 py-4", isCollapsed ? "px-2" : "px-4")}>
+        <div className={cn("flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50", isCollapsed ? "justify-center px-2 py-2" : "px-3 py-2.5")}>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0F172A] text-white shadow-sm">
             <Sparkles className="h-5 w-5" />
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold leading-tight text-slate-900">CommerceAgent</p>
-            <p className="text-xs text-slate-500">Razorpay workspace</p>
-          </div>
-          <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+          {!isCollapsed && (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-semibold leading-tight text-slate-900">CommerceAgent</p>
+                <p className="text-xs text-slate-500">Razorpay workspace</p>
+              </div>
+              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+            </>
+          )}
         </div>
 
         {/* Search */}
-        <div className="relative mt-3">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-          <input
-            placeholder="Search agents, orders…"
-            className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs placeholder:text-slate-400 focus:border-[#204CF5]/30 focus:outline-none focus:ring-2 focus:ring-[#204CF5]/15"
-          />
-          <kbd className="pointer-events-none absolute right-1.5 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 md:block">
-            ⌘K
-          </kbd>
-        </div>
+        {!isCollapsed && (
+          <div className="relative mt-3">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <input
+              placeholder="Search agents, orders…"
+              className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs placeholder:text-slate-400 focus:border-[#204CF5]/30 focus:outline-none focus:ring-2 focus:ring-[#204CF5]/15"
+            />
+            <kbd className="pointer-events-none absolute right-1.5 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 md:block">
+              ⌘K
+            </kbd>
+          </div>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin">
-        <p className="px-2 pb-2 text-[11px] font-semibold tracking-widest text-slate-400">COMMAND</p>
+      <nav className="flex-1 overflow-y-auto px-2 py-4 scrollbar-thin">
+        <p className={cn("pb-2 text-[11px] font-semibold tracking-widest text-slate-400", isCollapsed ? "px-1 text-center" : "px-2")}>
+          {isCollapsed ? "—" : "COMMAND"}
+        </p>
         <div className="space-y-1">
           {mainNav.map((item) => {
             const isActive = pathname === item.href;
@@ -71,16 +97,18 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                title={isCollapsed ? item.label : undefined}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors",
+                  isCollapsed && "justify-center px-2",
                   isActive
                     ? "bg-[#204CF5] text-white shadow-sm shadow-[#204CF5]/20"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
-                <Icon className={cn("h-4 w-4", isActive ? "text-white" : "text-slate-400")} />
-                <span className="flex-1">{item.label}</span>
-                {(item as { badge?: string }).badge && (
+                <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-slate-400")} />
+                {!isCollapsed && <span className="flex-1">{item.label}</span>}
+                {!isCollapsed && (item as { badge?: string }).badge && (
                   <span
                     className={cn(
                       "rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide",
@@ -90,12 +118,17 @@ export function Sidebar() {
                     {item.badge}
                   </span>
                 )}
+                {isCollapsed && (item as { badge?: string }).badge && (
+                  <span className="absolute right-3 h-2 w-2 rounded-full bg-emerald-500" />
+                )}
               </Link>
             );
           })}
         </div>
 
-        <p className="px-2 pb-2 pt-6 text-[11px] font-semibold tracking-widest text-slate-400">OPERATIONS</p>
+        <p className={cn("pb-2 pt-6 text-[11px] font-semibold tracking-widest text-slate-400", isCollapsed ? "px-1 text-center" : "px-2")}>
+          {isCollapsed ? "—" : "OPERATIONS"}
+        </p>
         <div className="space-y-1">
           {opsNav.map((item) => {
             const isActive = pathname === item.href;
@@ -104,60 +137,76 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                title={isCollapsed ? item.label : undefined}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors",
+                  isCollapsed && "justify-center px-2",
                   isActive
                     ? "bg-slate-900 text-white"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
-                <Icon className={cn("h-4 w-4", isActive ? "text-white" : "text-slate-400")} />
-                {item.label}
+                <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-slate-400")} />
+                {!isCollapsed && item.label}
               </Link>
             );
           })}
           <Link
             href="/settings"
+            title={isCollapsed ? "Settings" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors",
+              isCollapsed && "justify-center px-2",
               pathname === "/settings"
                 ? "bg-slate-900 text-white"
                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             )}
           >
-            <Settings className={cn("h-4 w-4", pathname === "/settings" ? "text-white" : "text-slate-400")} />
-            Settings
+            <Settings className={cn("h-4 w-4 shrink-0", pathname === "/settings" ? "text-white" : "text-slate-400")} />
+            {!isCollapsed && "Settings"}
           </Link>
         </div>
 
         {/* Guardrails card */}
-        <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/70 p-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-amber-600" />
-            <p className="text-xs font-semibold text-amber-900">Guardrails active</p>
+        {isCollapsed ? (
+          <div className="mt-6 flex justify-center">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-600" title="Guardrails active">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
           </div>
-          <p className="mt-1 text-[11px] leading-relaxed text-amber-800/80">
-            ₹2K session cap · 3 orders · human approvals for high-value moves.
-          </p>
-          <Link href="/settings" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-800">
-            View policy <ExternalLink className="h-3 w-3" />
-          </Link>
-        </div>
+        ) : (
+          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-amber-600" />
+              <p className="text-xs font-semibold text-amber-900">Guardrails active</p>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-amber-800/80">
+              ₹2K session cap · 3 orders · human approvals for high-value moves.
+            </p>
+            <Link href="/settings" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-800">
+              View policy <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* User */}
-      <div className="border-t border-slate-100 p-3">
-        <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white font-mono text-xs font-bold text-slate-700 ring-1 ring-slate-200">
+      <div className="border-t border-slate-100 p-2">
+        <div className={cn("flex items-center gap-3 rounded-xl bg-slate-50", isCollapsed ? "justify-center px-2 py-2" : "px-3 py-2.5")}>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white font-mono text-xs font-bold text-slate-700 ring-1 ring-slate-200">
             AK
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-slate-900">A. Kumar</p>
-            <p className="truncate text-[11px] text-slate-500">ops@razorpay.test</p>
-          </div>
-          <span className="h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
+          {!isCollapsed && (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-slate-900">A. Kumar</p>
+                <p className="truncate text-[11px] text-slate-500">ops@razorpay.test</p>
+              </div>
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
+            </>
+          )}
         </div>
-        <p className="mt-2 px-1 text-center text-[10px] text-slate-400">v0.1.0 · Razorpay test mode</p>
+        {!isCollapsed && <p className="mt-2 px-1 text-center text-[10px] text-slate-400">v0.1.0 · Razorpay test mode</p>}
       </div>
     </aside>
   );
