@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef, useContext } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { SidebarCollapsedContext } from "@/components/app-shell";
 
 import { usePolling } from "./use-polling";
 import type { StreamResponse, AuditLogRow } from "./types";
@@ -47,6 +48,7 @@ export function TerminalDashboard() {
   const [recoveryCustomerMsg, setRecoveryCustomerMsg] = useState(false);
   const [transitionState, setTransitionState] = useState<"idle" | "approving" | "rejecting">("idle");
   const approvalRef = useRef<HTMLDivElement>(null);
+  const sidebarCollapsed = useContext(SidebarCollapsedContext);
 
   // Stable session id per browser (persisted so reloads resume the chat).
   useEffect(() => {
@@ -270,8 +272,15 @@ export function TerminalDashboard() {
         <GuardianStatsStrip {...stats} />
       </div>
 
-      {/* Three-column body */}
-      <div className="grid min-h-0 flex-1 gap-4 bg-[#F9F8F6] p-4 lg:grid-cols-[320px_1fr_380px]">
+      {/* Three-column body — when sidebar collapses, give the extra 200px to customer simulator, not center */}
+      <div
+        className="grid min-h-0 flex-1 gap-4 bg-[#F9F8F6] p-4 transition-all duration-300 lg:grid-cols-[320px_1fr_380px]"
+        style={
+          sidebarCollapsed
+            ? { gridTemplateColumns: "520px minmax(0,1fr) 380px" }
+            : undefined
+        }
+      >
         {/* Left: customer simulator */}
         <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <CustomerChat feed={view.feed} busy={busy} onSend={sendMessage} recoveryMessage={recoveryCustomerMsg ? "Looks like the payment didn't go through — I've sent you a secure payment link instead 🙏" : null} />

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
+
+export const SidebarCollapsedContext = createContext(false);
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -19,7 +21,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pl = collapsed ? "pl-[92px]" : "pl-[292px]";
 
   return (
-    <>
+    <SidebarCollapsedContext.Provider value={collapsed}>
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
       <div className={`${pl} pr-3 pt-3 transition-all duration-300 ease-in-out`}>
         {/* Floating navbar */}
@@ -45,6 +47,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <main className="mt-3 min-h-[calc(100vh-92px)] pb-3">{children}</main>
       </div>
-    </>
+    </SidebarCollapsedContext.Provider>
   );
 }
