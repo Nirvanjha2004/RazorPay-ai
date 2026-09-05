@@ -33,7 +33,7 @@ export default async function AuditPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-6xl space-y-8 px-8 py-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Audit Trail</h1>
         <p className="text-sm text-muted-foreground">

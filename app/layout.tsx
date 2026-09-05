@@ -15,9 +15,8 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className="min-h-screen">
         <Sidebar />
-        <main className="pl-60">
-          <div className="mx-auto max-w-6xl px-8 py-8">{children}</div>
-        </main>
+        {/* Pages manage their own layout — the terminal needs full bleed. */}
+        <main className="h-screen overflow-hidden pl-60">{children}</main>
       </body>
     </html>
   );

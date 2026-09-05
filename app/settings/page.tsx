@@ -29,7 +29,7 @@ export default function SettingsPage() {
   const isTestMode = keyId?.startsWith("rzp_test_") ?? false;
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-6xl space-y-8 px-8 py-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">
